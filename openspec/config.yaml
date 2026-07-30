@@ -1,0 +1,63 @@
+schema: spec-driven
+
+context: |
+  Project: cargable_dashboard, a standalone dashboard intended for independent Vercel deployment at admin.cargable.es.
+  Stack: Next.js with TypeScript is selected; application code and tooling have not been scaffolded yet.
+  Architecture: dashboard monorepo with `frontend/` (Next.js App Router) and `backend/` (server-only dashboard API/BFF), deployed from separate Vercel root directories. Shared Supabase schema, migrations, and database contracts remain owned by the main Cargable repository. Never expose service-role credentials to the browser.
+  Persistence: hybrid (OpenSpec files plus Engram observations).
+  Workflow: interactive; technical SDD artifacts are written in English.
+  Review: strict 400-line budget; use ask-on-risk chained PRs for oversized work.
+  Testing: no test runner or quality tooling exists yet; Strict TDD is disabled until the selected stack is scaffolded and its test strategy is defined.
+
+strict_tdd: false
+
+testing:
+  runner:
+    command: ""
+    framework: "None detected"
+  layers:
+    unit: false
+    integration: false
+    e2e: false
+  coverage:
+    available: false
+    command: ""
+  quality:
+    linter: ""
+    type_checker: ""
+    formatter: ""
+
+workflow:
+  interaction: interactive
+  artifact_language: English
+  persistence: hybrid
+  review:
+    line_budget: 400
+    chained_pr_strategy: ask-on-risk
+  deployment_target: admin.cargable.es (independent Vercel deployment)
+
+rules:
+  proposal:
+    - State assumptions explicitly where application tooling or backend contracts are not established.
+    - Include a rollback plan for risky changes.
+  specs:
+    - Use Given/When/Then scenarios and RFC 2119 keywords.
+    - Keep requirements implementation-independent until the stack is chosen.
+  design:
+    - Document architecture decisions and their rationale.
+    - Identify deployment and operational consequences for admin.cargable.es.
+  tasks:
+    - Group work by phase and keep each task reviewable within the 400-line budget.
+    - Ask before splitting work into chained PRs.
+  apply:
+    guidelines:
+      - Do not scaffold application code during initialization.
+      - Follow the selected stack's conventions after it is established.
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas.
