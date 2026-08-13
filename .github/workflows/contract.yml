@@ -46,6 +46,17 @@ jobs:
         with:
           deno-version: v2.9.4
 
+      # The provider checkout at ./provider has no deno.json/package.json of
+      # its own, so Deno's upward config discovery would otherwise escape it
+      # and pick up this consumer repo's root package.json instead, breaking
+      # npm: specifier resolution for the provider's own test dependencies
+      # (ajv/ajv-formats). An empty deno.json establishes ./provider as its
+      # own config boundary, matching how the provider's own CI resolves
+      # these tests when run from its own repo root. Not part of the pinned/
+      # digest-verified content — added after checkout, never committed.
+      - name: Isolate provider Deno config from the consumer workspace
+        run: echo '{}' > provider/deno.json
+
       - name: Set up Supabase CLI 2.110.0
         uses: supabase/setup-cli@v1
         with:
