@@ -8,7 +8,7 @@ Build pnpm workspaces for deployed `frontend/` and `backend/`. Main Cargable pro
 
 | Decision | Choice and rationale | Alternatives considered |
 |---|---|---|
-| Workspace/contracts | `frontend`, `backend`, `packages/contracts`. Main Cargable owns a machine-readable `admin-dashboard/v1` schema and provider SQL tests. This repository records commit SHA, schema path, and digest; CI checks out that commit and generates/validates DTO validators with provenance. No registry or shared database definition is copied. Additive optional changes may remain v1; removals, changed meaning, or incompatible types require v2. | npm workspaces; npm package; locally authored shared contracts. |
+| Workspace/contracts | `frontend`, `backend`, `packages/contracts`. Main Cargable owns a machine-readable `admin-dashboard/v1` schema and provider SQL tests. `packages/contracts/source.json` records the approved remote, detached commit SHA, versioned schema path, and digest; CI checks out that commit and generates/validates DTO validators with provenance. No registry or shared database definition is copied. Additive optional changes may remain v1; removals, changed meaning, or incompatible types require v2. | npm workspaces; npm package; locally authored shared contracts. |
 | Backend | Hono TypeScript on Vercel’s Node runtime; its documented setup default-exports the app and suits the small read-only surface. | A second Next.js app duplicates rendering/build concerns; Next.js says Route Handlers are not a full backend replacement. Bare functions duplicate middleware/errors. |
 | Browser topology | `admin.cargable.es/api/dashboard/*` uses a thin frontend Route Handler proxy and no browser CORS. The separate backend Vercel URL remains internet-reachable: CORS is not access control, so every proxied or direct request independently verifies JWT and authorization. Each project has its own Root Directory/environment. | Cross-origin browser calls increase browser auth surface; external rewrites cannot perform explicit token handling. |
 | Security/operations | Zod validates request parameters, generated DTOs, and RPC responses. Sanitized errors and `private, no-store` prevent raw errors/data caching. The UI retains the last success, marks failures stale/unavailable, and refreshes every 300 seconds. An 8-second RPC timeout fails closed. JSON logs contain request ID, route, status, latency, contract SHA, and hashed subject—never tokens, PII, DTO bodies, or raw exceptions. Distributed rate limiting is excluded from MVP because no durable atomic provider is approved; it requires a separate hardening design. | CDN caching risks leakage; per-instance serverless limits are unreliable. |
@@ -53,7 +53,7 @@ Read-only routes are `GET /v1/authorization` and `GET /v1/reports/{business|invo
 |---|---|
 | Unit | Vitest: validators, range/snapshot UI, redaction, timeout. |
 | Integration | Hono/Next handlers: spoofed cookies, stale/expired tokens, refresh, claims/session mismatch, and direct-origin anonymous, invalid-token, non-member, and revoked-member denials; methods, no-store, fail-closed dependencies. |
-| Contract | CI checks out pinned SHA; generated consumers validate main fixtures and test-environment RPC results. Provider SQL tests must pass first. |
+| Contract | In the PR 1 CI gate, CI checks out the pinned detached SHA and runs provider SQL tests before any consumer contract test; generated consumers then validate provider fixtures, generated-output identity, and test-environment RPC results. |
 | E2E | Playwright: login, protected navigation, three reports, ranges/snapshots, empty/stale states, 300-second refresh, no mutation/raw data. |
 
 Strict TDD remains conditional: only after runners are scaffolded and configuration enables it may implementation use RED-GREEN-REFACTOR.
@@ -71,7 +71,7 @@ Strict TDD remains conditional: only after runners are scaffolded and configurat
 ## Migration / Rollout
 
 1. Main repository adds RPCs/schema/provider tests, then records a passing contract commit.
-2. Dashboard pins that SHA, generates validators, and passes contract/security tests before backend deployment.
+2. Dashboard pins that SHA; PR 1 CI runs provider SQL tests before consumer contract tests, generates validators, and passes contract/security tests before backend deployment.
 3. Deploy internet-reachable backend, then frontend; smoke/E2E precedes `admin.cargable.es` DNS.
 4. Roll back deployments independently and restore the previous passing SHA/generated validators; retain main contracts until unused.
 

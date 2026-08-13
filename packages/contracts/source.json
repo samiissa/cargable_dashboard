@@ -1,0 +1,6 @@
+{
+  "remote": "git@github.com:samiissa/recargable.git",
+  "revision": "bf5a2f6b4bf11c18cb7c3ed6c5a38ec604be3b55",
+  "schemaPath": "supabase/contracts/admin-dashboard/v1/schema.json",
+  "digest": "sha256:12565a69362b9e9ecd4d6d655e8b192ffd326a9f9db0cad22439104ac5ffaf26"
+}
