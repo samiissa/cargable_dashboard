@@ -9,6 +9,8 @@
     "build": "tsc --noEmit"
   },
   "dependencies": {
+    "@cargable/contracts": "workspace:*",
+    "@supabase/supabase-js": "2.112.3",
     "hono": "4.13.1",
     "zod": "4.4.3"
   }
