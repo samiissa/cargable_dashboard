@@ -74,11 +74,37 @@ Before provider-dependent contract work proceeds, the main Cargable repository M
 
 ## Phase 3: Protected Reporting UI
 
-- [ ] 3.1 RED: add `frontend/tests/integration/auth-proxy.test.ts` proving protected pages/proxy deny absent or invalid sessions without data and forward a token only after `getClaims()`/`getUser()`.
-- [ ] 3.2 Implement `frontend/src/auth/`, `frontend/app/login/page.tsx`, protected layout/pages, and `frontend/app/api/dashboard/[...path]/route.ts` as the same-origin token proxy.
-- [ ] 3.3 RED: add `frontend/tests/unit/reports.test.tsx` for labels, unsupported metrics absent, ranges versus snapshots, empty versus stale/unavailable, terminal-detail redaction, and 300-second refresh.
-- [ ] 3.4 Implement `frontend/src/{api,reports}/` and Business, Invoices, Operations pages with read-only presentation, last-success retention, freshness, and sanitized details.
-- [ ] 3.5 Add `frontend/tests/e2e/dashboard.spec.ts`: authorized navigation through three reports; range/snapshot, empty/stale, refresh, and no mutation/raw-data assertions.
+Implemented in full (3.1–3.5), then delivered as a three-child feature-branch-chain (PR 3a → PR 3b → PR 3c) because the combined authored footprint (~1,493 lines) was over 3.5x the single-PR 400-line cap — larger than PR 1 and PR 2, which each shipped under an approved `size:exception` instead. The maintainer chose the chained split over a fresh `size:exception` for PR 3.
+
+- [x] 3.1 RED: add `frontend/tests/integration/auth-proxy.test.ts` proving protected pages/proxy deny absent or invalid sessions without data and forward a token only after `getClaims()`/`getUser()`.
+- [x] 3.2 Implement `frontend/src/auth/`, `frontend/app/login/page.tsx`, protected layout/pages, and `frontend/app/api/dashboard/[...path]/route.ts` as the same-origin token proxy.
+- [x] 3.3 RED: add `frontend/tests/unit/reports.test.tsx` for labels, unsupported metrics absent, ranges versus snapshots, empty versus stale/unavailable, terminal-detail redaction, and 300-second refresh.
+- [x] 3.4 Implement `frontend/src/{api,reports}/` and Business, Invoices, Operations pages with read-only presentation, last-success retention, freshness, and sanitized details.
+- [x] 3.5 Add `frontend/tests/e2e/dashboard.spec.ts`: authorized navigation through three reports; range/snapshot, empty/stale, refresh, and no mutation/raw-data assertions.
+
+### PR 3a Boundary (`protected-ui-auth`: tasks 3.1–3.2)
+
+- [x] Focused test: `pnpm --filter @cargable/frontend test` — 10/10 passing (`tests/integration/auth-proxy.test.ts`). Typecheck/lint/build green.
+- [x] Runtime harness: N/A locally beyond the Vitest integration suite — the auth/proxy flow is exercised end-to-end against a live server once PR 3c's Playwright harness lands (protected pages redirect correctly, verified there).
+- [x] Limit: authored footprint ~639 lines — `frontend/src/auth/*`, `frontend/src/api/dashboard-proxy.ts`, `frontend/app/api/dashboard/[...path]/route.ts`, `frontend/app/login/page.tsx`, `frontend/app/layout.tsx`, `frontend/proxy.ts`, `frontend/tests/integration/auth-proxy.test.ts`, plus scaffold (`package.json`, `tsconfig.json`, `vitest.config.ts`, `next-env.d.ts`, Next-generated `AGENTS.md`/`CLAUDE.md` stubs). Over the 400-line cap; consistent in size with PR 1's approved `size:exception` (~639 lines) — same exception requested here.
+- [x] Rollback: revert the files listed above as one unit; no reports/e2e code exists yet on this branch.
+- [x] Out of scope: reports UI (PR 3b), e2e harness (PR 3c), `backend/`, database schema, deployment config — confirmed untouched.
+
+### PR 3b Boundary (`protected-ui-reports`: tasks 3.3–3.4)
+
+- [ ] Focused test: pending — see PR 3b commit.
+- [ ] Runtime harness: pending.
+- [ ] Limit: pending — expected ~750–800 lines (`frontend/src/reports/*`, `frontend/app/(protected)/**`, `frontend/tests/unit/reports.test.tsx`, `frontend/next.config.ts`, RTL/jsdom test-harness scaffold). Expected to need its own `size:exception` given the single cohesive `reports.test.tsx` RED task spans all three reports.
+- [ ] Rollback: pending.
+- [ ] Out of scope: pending.
+
+### PR 3c Boundary (`protected-ui-e2e`: task 3.5)
+
+- [ ] Focused test: pending — see PR 3c commit.
+- [ ] Runtime harness: pending.
+- [ ] Limit: pending — expected ~130 lines (`frontend/playwright.config.ts`, `frontend/tests/e2e/dashboard.spec.ts`, `package.json`/`tsconfig.json` playwright wiring). Expected within the 400-line cap.
+- [ ] Rollback: pending.
+- [ ] Out of scope: pending.
 
 ## Phase 4: Deployment Verification
 
