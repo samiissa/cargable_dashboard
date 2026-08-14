@@ -1,0 +1,93 @@
+name: Contract Provenance Gate
+
+on:
+  pull_request:
+    paths:
+      - "packages/contracts/**"
+      - ".github/workflows/contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/contracts/**"
+      - ".github/workflows/contract.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-contract:
+    name: Verify pinned provider contract before consumer tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v4
+
+      # Only this one approved remote/ref pair may ever be checked out here;
+      # remote/ref/path overrides are not accepted from any workflow input.
+      - name: Check out the approved provider remote at its detached pinned SHA
+        uses: actions/checkout@v4
+        with:
+          repository: samiissa/recargable
+          ref: bf5a2f6b4bf11c18cb7c3ed6c5a38ec604be3b55
+          token: ${{ secrets.PROVIDER_REPO_TOKEN }}
+          path: provider
+
+      - name: Verify the pinned schema path and digest
+        run: |
+          schema="provider/supabase/contracts/admin-dashboard/v1/schema.json"
+          test -f "$schema"
+          actual="sha256:$(sha256sum "$schema" | cut -d' ' -f1)"
+          expected="$(node -e "console.log(require('./packages/contracts/source.json').digest)")"
+          test "$actual" = "$expected"
+
+      - name: Set up Deno 2.9.4
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.4
+
+      # The provider checkout at ./provider has no deno.json/package.json of
+      # its own, so Deno's upward config discovery would otherwise escape it
+      # and pick up this consumer repo's root package.json instead, breaking
+      # npm: specifier resolution for the provider's own test dependencies
+      # (ajv/ajv-formats). An empty deno.json establishes ./provider as its
+      # own config boundary, matching how the provider's own CI resolves
+      # these tests when run from its own repo root. Not part of the pinned/
+      # digest-verified content — added after checkout, never committed.
+      - name: Isolate provider Deno config from the consumer workspace
+        run: echo '{}' > provider/deno.json
+
+      - name: Set up Supabase CLI 2.110.0
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.110.0
+
+      - name: Run provider SQL tests against the pinned checkout
+        working-directory: provider
+        run: |
+          supabase start
+          supabase db reset --local
+          psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/sql/admin_dashboard_authorization.test.sql
+          psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/sql/admin_dashboard_reporting.test.sql
+          deno test --allow-read supabase/tests/contracts/admin_dashboard_v1.test.ts
+          deno test --allow-read supabase/tests/contracts/admin_dashboard_v1_ajv.test.ts
+          supabase stop --no-backup
+
+      - name: Set up pnpm and Node
+        uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Regenerate consumer contracts from the verified pinned schema
+        run: node packages/contracts/scripts/generate-contracts.ts provider/supabase/contracts/admin-dashboard/v1/schema.json
+
+      - name: Fail if generated output drifted from the committed output
+        run: git diff --exit-code -- packages/contracts/src/generated
+
+      - name: Run consumer contract tests
+        run: pnpm --filter @cargable/contracts test

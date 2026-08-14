@@ -2,21 +2,22 @@ schema: spec-driven
 
 context: |
   Project: cargable_dashboard, a standalone dashboard intended for independent Vercel deployment at admin.cargable.es.
-  Stack: Next.js with TypeScript is selected; application code and tooling have not been scaffolded yet.
+  Stack: Next.js with TypeScript is selected. A pnpm workspace, package manifests, package test scripts, and the contracts Vitest configuration exist; application production code is not scaffolded.
   Architecture: dashboard monorepo with `frontend/` (Next.js App Router) and `backend/` (server-only dashboard API/BFF), deployed from separate Vercel root directories. Shared Supabase schema, migrations, and database contracts remain owned by the main Cargable repository. Never expose service-role credentials to the browser.
   Persistence: hybrid (OpenSpec files plus Engram observations).
   Workflow: interactive; technical SDD artifacts are written in English.
   Review: strict 400-line budget; use ask-on-risk chained PRs for oversized work.
-  Testing: no test runner or quality tooling exists yet; Strict TDD is disabled until the selected stack is scaffolded and its test strategy is defined.
+  Testing: Vitest is configured for `packages/contracts`, so Strict TDD applies there with RED-GREEN-REFACTOR. Backend and frontend runtime/browser harnesses do not exist yet. TypeScript strict configuration, reproducible lockfile, deliberate dependency pinning, and typecheck/lint/build tooling remain pending.
 
-strict_tdd: false
+strict_tdd: true
 
 testing:
+  active_scope: contracts
   runner:
-    command: ""
-    framework: "None detected"
+    command: "pnpm --filter @cargable/contracts test"
+    framework: Vitest
   layers:
-    unit: false
+    unit: true
     integration: false
     e2e: false
   coverage:
@@ -26,6 +27,14 @@ testing:
     linter: ""
     type_checker: ""
     formatter: ""
+    pending:
+      - TypeScript strict configuration and typecheck scripts
+      - Lint configuration and scripts
+      - Build scripts where applicable
+      - Reproducible lockfile and deliberately pinned tool/framework versions
+  unavailable_harnesses:
+    - backend
+    - frontend
 
 workflow:
   interaction: interactive
@@ -53,10 +62,11 @@ rules:
     guidelines:
       - Do not scaffold application code during initialization.
       - Follow the selected stack's conventions after it is established.
-    tdd: false
-    test_command: ""
+    tdd: true
+    tdd_scope: contracts
+    test_command: "pnpm --filter @cargable/contracts test"
   verify:
-    test_command: ""
+    test_command: "pnpm --filter @cargable/contracts test"
     build_command: ""
     coverage_threshold: 0
   archive:

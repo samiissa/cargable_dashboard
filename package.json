@@ -1,0 +1,20 @@
+{
+  "name": "cargable-dashboard",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "test": "pnpm --filter @cargable/contracts test",
+    "test:contracts": "pnpm --filter @cargable/contracts test",
+    "typecheck": "pnpm --recursive --if-present typecheck",
+    "lint": "pnpm --recursive --if-present lint",
+    "build": "pnpm --recursive --if-present build"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "@types/node": "26.2.0",
+    "eslint": "9.39.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.67.0",
+    "vitest": "4.1.10"
+  }
+}

@@ -1,2 +1,8 @@
 # Local AI runtime state
 .atl/
+
+# JavaScript workspace outputs
+node_modules/
+coverage/
+dist/
+.next/
