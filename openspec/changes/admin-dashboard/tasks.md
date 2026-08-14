@@ -92,11 +92,11 @@ Implemented in full (3.1–3.5), then delivered as a three-child feature-branch-
 
 ### PR 3b Boundary (`protected-ui-reports`: tasks 3.3–3.4)
 
-- [ ] Focused test: pending — see PR 3b commit.
-- [ ] Runtime harness: pending.
-- [ ] Limit: pending — expected ~750–800 lines (`frontend/src/reports/*`, `frontend/app/(protected)/**`, `frontend/tests/unit/reports.test.tsx`, `frontend/next.config.ts`, RTL/jsdom test-harness scaffold). Expected to need its own `size:exception` given the single cohesive `reports.test.tsx` RED task spans all three reports.
-- [ ] Rollback: pending.
-- [ ] Out of scope: pending.
+- [x] Focused test: `pnpm --filter @cargable/frontend test` — 24/24 passing (`tests/integration/auth-proxy.test.ts` 10/10 + `tests/unit/reports.test.tsx` 14/14, unaffected/carried from PR 3a). Typecheck/lint green.
+- [x] Runtime harness: N/A for this commit in isolation beyond the Vitest component-render suite (`@vitest-environment jsdom` + Testing Library); full browser exercise happens in PR 3c against the assembled tree.
+- [x] Limit: authored footprint ~752 lines — `frontend/src/reports/*`, `frontend/app/(protected)/**`, `frontend/tests/unit/reports.test.tsx`, `frontend/tests/setup.ts`, `frontend/next.config.ts` (Turbopack `@cargable/contracts` resolution fix), `package.json`/`tsconfig.json`/`vitest.config.ts` RTL+jsdom wiring. Over the 400-line cap by ~1.9x — larger than PR 1/3a but smaller than PR 2 (~904). **`size:exception` requested**: the RED task (3.3) was authored as one cohesive test file covering all three reports' shared behavior (labels, ranges/snapshots, empty/stale, redaction, refresh), so splitting further would fragment a single RED/GREEN pairing across PRs.
+- [x] Rollback: revert the files listed above as one unit; PR 3a's auth/proxy code is untouched.
+- [x] Out of scope: e2e harness (PR 3c), `backend/`, database schema, deployment config — confirmed untouched.
 
 ### PR 3c Boundary (`protected-ui-e2e`: task 3.5)
 
