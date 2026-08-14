@@ -100,11 +100,11 @@ Implemented in full (3.1–3.5), then delivered as a three-child feature-branch-
 
 ### PR 3c Boundary (`protected-ui-e2e`: task 3.5)
 
-- [ ] Focused test: pending — see PR 3c commit.
-- [ ] Runtime harness: pending.
-- [ ] Limit: pending — expected ~130 lines (`frontend/playwright.config.ts`, `frontend/tests/e2e/dashboard.spec.ts`, `package.json`/`tsconfig.json` playwright wiring). Expected within the 400-line cap.
-- [ ] Rollback: pending.
-- [ ] Out of scope: pending.
+- [x] Focused test: `pnpm --filter @cargable/frontend test` — 24/24 passing (unaffected, carried from PR 3a/3b). Typecheck/lint green.
+- [x] Runtime harness: fully scaffolded AND actually exercised — Playwright Chromium installed, a real `next dev` server booted with placeholder Supabase/backend env vars, and all three protected routes (`/business`, `/invoices`, `/operations`) verified to 307-redirect to `/login` with no report data or module errors; `pnpm test:e2e --grep "unauthenticated"` passed for real against the live server. The remaining scenarios in `dashboard.spec.ts` require a provisioned `admin_members` Supabase test account (`E2E_ADMIN_EMAIL`/`E2E_ADMIN_PASSWORD`) that does not exist in this environment; they `test.skip` themselves cleanly rather than failing CI, and are ready to run once that fixture exists — a known, explicitly out-of-scope gap for this change, not a regression.
+- [x] Limit: authored footprint ~130 lines — `frontend/playwright.config.ts`, `frontend/tests/e2e/dashboard.spec.ts`, `package.json`/`tsconfig.json` playwright wiring. Within the 400-line cap; no exception needed.
+- [x] Rollback: revert the files listed above as one unit; PR 3a/3b's auth/proxy/reports code is untouched.
+- [x] Out of scope: `backend/`, database schema/migrations, RPC implementation, real customer data, and deployment configuration (`vercel.json`, Phase 4) — confirmed untouched.
 
 ## Phase 4: Deployment Verification
 
