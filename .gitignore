@@ -1,8 +1,17 @@
 # Local AI runtime state
 .atl/
 
+# Local secrets (never commit real or DEV Supabase credentials)
+.env
+.env.local
+.env.*.local
+
 # JavaScript workspace outputs
 node_modules/
 coverage/
 dist/
 .next/
+
+# Playwright e2e artifacts
+test-results/
+playwright-report/

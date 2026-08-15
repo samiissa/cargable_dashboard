@@ -7,5 +7,5 @@
     "target": "ES2024",
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "api/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts", "api/**/*.ts", "tests/**/*.ts", "dev-server.ts"]
 }
