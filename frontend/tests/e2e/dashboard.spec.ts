@@ -65,8 +65,12 @@ test.describe("authorized administrator session", () => {
 
   test("a refresh failure retains the last known data and marks it stale", async ({ page, context }) => {
     await login(page);
-    await context.route("**/api/dashboard/reports/business*", (route) => route.abort());
+    // Wait for the initial load to succeed before intercepting — otherwise
+    // the abort below can race the first fetch itself, leaving no "last
+    // known data" to fall back to and the report shows unavailable instead.
+    await expect(page.getByText("Registered users")).toBeVisible();
 
+    await context.route("**/api/dashboard/reports/business*", (route) => route.abort());
     await page.getByRole("button", { name: "Refresh" }).click();
     await expect(page.getByText(/Stale — showing last known data/)).toBeVisible();
     await expect(page.getByText("Registered users")).toBeVisible();
