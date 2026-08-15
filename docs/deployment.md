@@ -8,10 +8,18 @@ The dashboard ships as **two independent Vercel projects** from this one reposit
 | backend | `backend` | `backend/vercel.json` | Hono app on Vercel's Node runtime (`backend/api/index.ts`) |
 | frontend | `frontend` | `frontend/vercel.json` | Next.js App Router UI, its own `/api/dashboard/*` proxy |
 
-There is **no shared root `vercel.json`**. Each project is created separately in the Vercel
-dashboard (or `vercel link`), pointed at this same Git repository, with its **Root Directory**
-set to `backend` or `frontend` respectively. `vercel.json` cannot set the Root Directory itself —
-that is a per-project setting, configured once when the project is created.
+There is **no shared root `vercel.json`**. Each project is created separately (via `vercel link`
+run from inside `backend/` and `frontend/`, or the dashboard), pointed at this same Git
+repository, with its **Root Directory** set to `backend` or `frontend` respectively. Root Directory
+is a per-project setting — set it once via the dashboard (Settings → General) or
+`vercel project` API/CLI, not in `vercel.json`, which lives inside the directory it describes and
+can't declare where that directory is.
+
+Do not run `vercel curl`/`vercel deploy` unscoped from the repo root without `--project`/a linked
+`.vercel/project.json` in cwd: if it can't unambiguously resolve a project it can silently offer to
+create a **new**, unwanted combined `services`-style project and write a root `vercel.json` that
+contradicts the two-project architecture above. If that happens, delete the stray project and
+`vercel.json`.
 
 The Vercel dashboard/frontend origin (`admin.cargable.es`) and the backend's own deployment URL
 are two different origins by design: the frontend's Route Handler proxy (`frontend/app/api/dashboard/[...path]/route.ts`)
@@ -37,31 +45,69 @@ so the correct app builds regardless of whether Vercel's build container's worki
 the repo root or the project's Root Directory — `pnpm --filter` resolves the workspace by walking
 up to `pnpm-workspace.yaml` either way.
 
-**Known discrepancy, called out deliberately, not silently fixed:** every workspace package's
-`"build"` npm script (`backend`, `frontend`, `packages/contracts`) is `tsc --noEmit` — a
-type-check gate, not a real build. That is correct and sufficient for `backend` (Vercel's Node
-runtime bundles `backend/api/index.ts` itself; no separate bundle step is needed) and for
-`packages/contracts` (consumed as raw TypeScript, never built). It is **not** sufficient for
-`frontend`: `pnpm --filter @cargable/frontend build` alone would type-check but never run
-`next build`, so the Next.js framework/output detection would find no `.next` output and the
-deployment would fail. `frontend/vercel.json` therefore overrides `buildCommand` to invoke
-`next build` directly (`pnpm --filter @cargable/frontend exec next build`) instead of the
-package's own `build` script. `frontend/package.json`'s `"build": "tsc --noEmit"` is left
-unchanged deliberately: the root `pnpm build` (`pnpm --recursive --if-present build`) stays a
-fast, workspace-wide type-check gate for CI/local use, and does not start running a full Next.js
-production build (which needs real Supabase/backend env vars to complete) as a side effect of
-this deployment change.
+Every workspace package's `"build"` npm script (`backend`, `frontend`, `packages/contracts`) is
+`tsc --noEmit` — a type-check gate, not a real build. That's correct and sufficient for
+`packages/contracts` (consumed as raw TypeScript, never built, everywhere it's imported from —
+`tsx` locally, Next.js's own bundler in the frontend). It is **not** sufficient for `frontend`
+(needs an actual `next build`, see below) or, differently, for `backend` (see "Backend: why a real
+build step exists" below) — both projects therefore override `buildCommand` in their own
+`vercel.json` rather than deploying with plain `tsc --noEmit`.
 
-Verified locally before writing this document:
-- `pnpm --filter @cargable/backend build` → `tsc --noEmit`, exits 0.
-- `pnpm --filter @cargable/frontend build` → `tsc --noEmit`, exits 0 (confirms the discrepancy above).
-- `pnpm --filter @cargable/frontend exec next build` → succeeds standalone with placeholder env
-  values, producing the expected route manifest (`/login`, `/business`, `/invoices`,
-  `/operations`, `/api/dashboard/[...path]`, plus the auth `Proxy (Middleware)`).
+`frontend/vercel.json` overrides `buildCommand` to invoke `next build` directly
+(`pnpm --filter @cargable/frontend exec next build`) instead of the package's own `build` script,
+since `pnpm --filter @cargable/frontend build` alone would type-check but never produce `.next`
+output. `frontend/package.json`'s `"build": "tsc --noEmit"` is left unchanged deliberately: the
+root `pnpm build` (`pnpm --recursive --if-present build`) stays a fast, workspace-wide type-check
+gate for CI/local use, and does not start running a full Next.js production build (which needs
+real Supabase/backend env vars to complete) as a side effect of this deployment change.
 
 Align each Vercel project's **Node.js Version** setting with CI (`.github/workflows/contract.yml`
 runs Node 24); neither `vercel.json` pins a `functions.runtime` version, so the dashboard setting
 is authoritative.
+
+### Backend: why a real build step exists, and the exact function shape Vercel expects
+
+Two things about `backend/`'s deploy are **not** optional zero-config defaults, both discovered
+only by actually deploying (nothing here was exercised end-to-end before the DEV `admin_members`
+test account existed to unblock the frontend e2e suite, which is what led to actually running a
+real deploy for the first time):
+
+1. **`@cargable/contracts` must be bundled in, not left as a workspace import.** Vercel's Node.js
+   Functions runtime only does native TypeScript type-stripping for files inside the function's
+   own Root Directory (`backend/`). `@cargable/contracts` is deliberately raw, un-built TypeScript
+   living *outside* that directory, reached only through the pnpm workspace symlink — at request
+   time Node's plain ESM loader tries to import that raw `.ts` file directly and fails with
+   `ERR_MODULE_NOT_FOUND`. `backend/vercel.json`'s `buildCommand`
+   (`pnpm --filter @cargable/backend build:vercel`, defined in `backend/package.json`) runs
+   `tsc --noEmit` for a real type-check gate, then `backend/scripts/build-vercel.mjs` (esbuild)
+   bundles `api/index.ts` into `api/handler.js`, inlining `@cargable/contracts`'s source while
+   leaving real npm dependencies (`hono`, `@supabase/supabase-js`, `zod`) external — they're
+   installed normally at runtime. `api/handler.js` is a **generated deploy artifact**, gitignored,
+   never committed.
+2. **`backend/api/index.ts` must export the raw Hono app, never wrapped in `hono/vercel`'s
+   `handle()`.** Vercel's Node.js Functions runtime natively calls a fetch-style default export
+   (`(request: Request) => Response | Promise<Response>`); a Hono app satisfies that directly.
+   `handle()` targets an older calling convention — under it, Vercel invokes the export as a
+   legacy `(req, res) => void` handler and silently discards the returned `Response`, hanging
+   every request forever (confirmed live: `curl` never returned, and Vercel's own build log warned
+   `default export returned a 'Response'... You likely meant the Web fetch-style API`). Do not
+   reintroduce `handle()`.
+
+`backend/vercel.json` also sets an explicit `rewrites` rule
+(`{"source": "/(.*)", "destination": "/api/handler"}`) so every path (`/v1/authorization`,
+`/v1/reports/*`) reaches that one bundled function — without it, Vercel returns a platform-level
+`404` for anything other than the literal `/api/handler` path, since Hono's own router only sees
+whatever path the platform routes to it.
+
+Two settings are **not** in `vercel.json` and must be set once per project (dashboard, or
+`vercel api /v9/projects/<name> -X PATCH -F <field>=<value>`, matching how Root Directory is set):
+`outputDirectory: "."` (an unset/`public` default makes Vercel expect static output that a
+Functions-only project never produces) and **do not** set the dashboard **Framework Preset** to
+`Hono` — that opts into Vercel's own framework-aware build/typecheck path, which (as observed live)
+can inject an ambient global that collapses `@types/node`'s conditional `Response` type to `{}`,
+breaking `tsc --noEmit` with phantom `Property 'status' does not exist on type 'Response'` errors
+unrelated to our code. Leave the backend project's Framework Preset **unset/Other**
+(`"framework": null` in `backend/vercel.json`, matching the project setting).
 
 ## Environment variables
 
@@ -109,7 +155,12 @@ frontend; smoke/E2E precedes `admin.cargable.es` DNS."):
    - Confirm anonymous and invalid-bearer-token requests are denied with a sanitized `401`/`403`
      and no report data (CLAUDE.md: "the independently reachable backend MUST be secure when
      called directly" — this must hold even before the frontend exists).
-   - Confirm an unsupported method (e.g. `POST`) returns a sanitized `405`.
+   - Confirm an unsupported method (e.g. `POST`) returns a sanitized error. Anonymously this is a
+     `401` (`UNAUTHENTICATED`), not `405` — identity middleware runs before route/method matching
+     (CLAUDE.md: "Preserve the middleware order: ... identity verification, authorization, then
+     route handling"), so an anonymous caller never reaches the method check. `405` needs a
+     request that passes identity/authorization first; verifying it is covered by the backend's
+     own integration tests (`backend/tests/integration/*.test.ts`), not this anonymous smoke test.
    - Confirm responses carry `Cache-Control: private, no-store`.
    This exercises the exact deployed artifact the frontend will proxy to; it is not covered by the
    in-process Vitest integration suite (`backend/tests/integration/*.test.ts`), which runs against

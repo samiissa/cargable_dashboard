@@ -1,4 +1,5 @@
 {
   "framework": null,
-  "buildCommand": "pnpm --filter @cargable/backend build"
+  "buildCommand": "pnpm --filter @cargable/backend build:vercel",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/handler" }]
 }

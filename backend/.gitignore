@@ -1,0 +1,6 @@
+.vercel
+.env*
+
+# esbuild output for Vercel deploys only (see scripts/build-vercel.mjs)
+api/handler.js
+api/handler.js.map
