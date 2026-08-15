@@ -15,3 +15,6 @@ dist/
 # Playwright e2e artifacts
 test-results/
 playwright-report/
+
+# Vercel CLI local project linking
+.vercel
