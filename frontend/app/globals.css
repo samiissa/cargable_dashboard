@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/*
+ * Single dark theme, matching the sibling Flutter app's ColorScheme.
+ * Reusable design tokens — components must reference these Tailwind
+ * utilities (e.g. `bg-primary`, `text-onSurfaceMuted`) instead of hardcoding
+ * hex values.
+ */
+@theme {
+  --color-primary: #22c55e;
+  --color-background: #0d0d0d;
+  --color-surface: #1a1a2e;
+  --color-onSurface: #ffffff;
+  --color-onSurfaceMuted: #9ca3af;
+  --color-error: #ef4444;
+  --color-surfaceBorder: #374151;
+  --color-buttonDisabledBackground: #1f2937;
+  --color-overlayPrimary: #22c55e29;
+  --color-statusWarning: #f97316;
+  --color-onPrimary: #000000;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}

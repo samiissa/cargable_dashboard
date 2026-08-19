@@ -6,6 +6,16 @@ import type { SupportedRange } from "../api/dashboard-proxy";
 import { FreshnessLabel } from "./freshness-label";
 import { formatRangeLabel } from "./metadata";
 import { RangeSelector } from "./range-selector";
+import {
+  cardClass,
+  footnoteClass,
+  reportHeadingClass,
+  reportSectionClass,
+  stateErrorClass,
+  stateMutedClass,
+  statLabelClass,
+  statValueClass,
+} from "./report-styles";
 import type { ReportStatus } from "./use-report";
 
 export interface BusinessReportViewProps {
@@ -22,26 +32,32 @@ export function BusinessReportView({ data, status, lastUpdatedAt, range, onRange
   const showData = data && (status === "ready" || status === "stale");
 
   return (
-    <section aria-labelledby="business-report-heading">
-      <h1 id="business-report-heading">Business</h1>
+    <section aria-labelledby="business-report-heading" className={reportSectionClass}>
+      <h1 id="business-report-heading" className={reportHeadingClass}>
+        Business
+      </h1>
       <RangeSelector value={range} onChange={onRangeChange} />
       <FreshnessLabel status={status} lastUpdatedAt={lastUpdatedAt} onRefresh={onRefresh} />
-      {status === "loading" && <p>Loading business report…</p>}
-      {status === "unavailable" && <p role="alert">Business report is unavailable.</p>}
-      {status === "empty" && <p>No business observations for this range.</p>}
+      {status === "loading" && <p className={stateMutedClass}>Loading business report…</p>}
+      {status === "unavailable" && (
+        <p role="alert" className={stateErrorClass}>
+          Business report is unavailable.
+        </p>
+      )}
+      {status === "empty" && <p className={stateMutedClass}>No business observations for this range.</p>}
       {showData && (
-        <dl>
-          <div>
-            <dt>Registered users</dt>
-            <dd>{data.registeredUsers}</dd>
+        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className={cardClass}>
+            <dt className={statLabelClass}>Registered users</dt>
+            <dd className={statValueClass}>{data.registeredUsers}</dd>
           </div>
-          <div>
-            <dt>Active paid subscriptions (entitlement snapshot)</dt>
-            <dd>{data.activePaidSubscriptions.count}</dd>
+          <div className={cardClass}>
+            <dt className={statLabelClass}>Active paid subscriptions (entitlement snapshot)</dt>
+            <dd className={statValueClass}>{data.activePaidSubscriptions.count}</dd>
           </div>
         </dl>
       )}
-      {showData && <p>{formatRangeLabel(data.metadata)}</p>}
+      {showData && <p className={footnoteClass}>{formatRangeLabel(data.metadata)}</p>}
     </section>
   );
 }
