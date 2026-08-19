@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/business", label: "Business" },
-  { href: "/invoices", label: "Invoices" },
-  { href: "/operations", label: "Operations" },
+  { href: "/business", label: "Negocio" },
+  { href: "/invoices", label: "Facturas" },
+  { href: "/operations", label: "Operaciones" },
 ] as const;
 
 const linkBaseClass =
@@ -17,7 +17,7 @@ export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Dashboard reports" className="mx-auto flex max-w-5xl items-center gap-2 px-6 py-4">
+    <nav aria-label="Reportes del panel" className="mx-auto flex max-w-5xl items-center gap-2 px-6 py-4">
       <ul className="flex gap-2">
         {LINKS.map(({ href, label }) => {
           const active = pathname === href;

@@ -13,7 +13,7 @@ export function isSnapshot(metadata: RangeMetadata): boolean {
 
 export function formatRangeLabel(metadata: RangeMetadata): string {
   if (isSnapshot(metadata)) {
-    return "Snapshot — no reliable time range available";
+    return "Instantánea — no hay un rango de tiempo confiable disponible";
   }
-  return `${metadata.range} range: ${metadata.startInclusive} to ${metadata.endExclusive}`;
+  return `Rango ${metadata.range}: ${metadata.startInclusive} a ${metadata.endExclusive}`;
 }

@@ -23,7 +23,7 @@ export function LoginForm() {
 
     setSubmitting(false);
     if (signInError) {
-      setError("Invalid email or password.");
+      setError("Correo electrónico o contraseña inválidos.");
       return;
     }
 
@@ -35,9 +35,9 @@ export function LoginForm() {
     "rounded-xl border-[1.5px] border-transparent bg-surface px-4 py-2.5 text-base text-onSurface outline-none focus-visible:border-primary";
 
   return (
-    <form onSubmit={handleSubmit} aria-label="Administrator sign in" className="flex w-full max-w-sm flex-col gap-4">
+    <form onSubmit={handleSubmit} aria-label="Inicio de sesión de administrador" className="flex w-full max-w-sm flex-col gap-4">
       <label className="flex flex-col gap-1.5 text-sm font-medium text-onSurfaceMuted">
-        Email
+        Correo electrónico
         <input
           type="email"
           value={email}
@@ -48,7 +48,7 @@ export function LoginForm() {
         />
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-medium text-onSurfaceMuted">
-        Password
+        Contraseña
         <input
           type="password"
           value={password}
@@ -68,7 +68,7 @@ export function LoginForm() {
         disabled={submitting}
         className="mt-2 rounded-full bg-primary px-6 py-3 text-base font-semibold text-onPrimary outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 disabled:bg-buttonDisabledBackground disabled:text-onSurfaceMuted"
       >
-        {submitting ? "Signing in…" : "Sign in"}
+        {submitting ? "Iniciando sesión…" : "Iniciar sesión"}
       </button>
     </form>
   );
