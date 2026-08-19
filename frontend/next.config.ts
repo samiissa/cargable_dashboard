@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Local-only: lets the dev server be reached from another device on the
+  // LAN (e.g. testing on a phone/tablet) instead of just `localhost`. Next.js
+  // blocks cross-origin dev asset/HMR requests by default. Update the IP if
+  // the machine's LAN address changes (DHCP). Irrelevant in production.
+  allowedDevOrigins: ["192.168.1.92"],
   // `@cargable/contracts` ships raw TypeScript source (no prebuild step); Next
   // must transpile it directly rather than treating it as precompiled JS.
   transpilePackages: ["@cargable/contracts"],
