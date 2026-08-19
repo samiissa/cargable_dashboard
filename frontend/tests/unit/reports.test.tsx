@@ -236,6 +236,6 @@ describe("OperationsReportView terminal failure redaction", () => {
       />,
     );
 
-    expect(screen.getByText(/invoice-import — antigüedad 300s, intentos 3/)).toBeInTheDocument();
+    expect(screen.getByText(/invoice-import — antigüedad 5 min, intentos 3/)).toBeInTheDocument();
   });
 });

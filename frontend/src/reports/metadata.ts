@@ -17,3 +17,19 @@ export function formatRangeLabel(metadata: RangeMetadata): string {
   }
   return `Rango ${metadata.range}: ${metadata.startInclusive} a ${metadata.endExclusive}`;
 }
+
+/** Formats a raw age in seconds (e.g. `failure.ageSeconds`) as a human-readable duration, same value, just legible. */
+export function formatAge(ageSeconds: number): string {
+  if (ageSeconds < 60) {
+    return `${ageSeconds} s`;
+  }
+  if (ageSeconds < 3600) {
+    return `${Math.floor(ageSeconds / 60)} min`;
+  }
+  if (ageSeconds < 86400) {
+    return `${Math.floor(ageSeconds / 3600)} h`;
+  }
+  const days = Math.floor(ageSeconds / 86400);
+  const hours = Math.floor((ageSeconds % 86400) / 3600);
+  return `${days} d ${hours} h`;
+}

@@ -4,7 +4,7 @@ import type { OperationsReport } from "@cargable/contracts";
 
 import type { SupportedRange } from "../api/dashboard-proxy";
 import { FreshnessLabel } from "./freshness-label";
-import { formatRangeLabel } from "./metadata";
+import { formatAge, formatRangeLabel } from "./metadata";
 import { RangeSelector } from "./range-selector";
 import {
   cardClass,
@@ -81,7 +81,7 @@ export function OperationsReportView({ data, status, lastUpdatedAt, range, onRan
             <ul className="divide-y divide-surfaceBorder">
               {data.terminalFailures.map((failure, index) => (
                 <li key={index} className={listRowClass}>
-                  {failure.jobType} — antigüedad {failure.ageSeconds}s, intentos {failure.attempts}
+                  {failure.jobType} — antigüedad {formatAge(failure.ageSeconds)}, intentos {failure.attempts}
                 </li>
               ))}
             </ul>
