@@ -108,8 +108,8 @@ describe("BusinessReportView", () => {
       />,
     );
 
-    expect(screen.getByText("Registered users")).toBeInTheDocument();
-    expect(screen.getByText("Active paid subscriptions (entitlement snapshot)")).toBeInTheDocument();
+    expect(screen.getByText("Usuarios registrados")).toBeInTheDocument();
+    expect(screen.getByText("Suscripciones de pago activas (instantánea de derechos)")).toBeInTheDocument();
   });
 
   it("never displays unsupported metrics such as Platform Costs, DAU, WAU, or MAU", () => {
@@ -142,7 +142,7 @@ describe("BusinessReportView", () => {
       />,
     );
 
-    expect(screen.getByText(/30d range:/)).toBeInTheDocument();
+    expect(screen.getByText(/Rango 30d:/)).toBeInTheDocument();
   });
 
   it("labels the result as a snapshot instead of a calculated range when reliable timestamps are unavailable", () => {
@@ -161,7 +161,7 @@ describe("BusinessReportView", () => {
       />,
     );
 
-    expect(screen.getByText(/Snapshot/)).toBeInTheDocument();
+    expect(screen.getByText(/Instantánea/)).toBeInTheDocument();
   });
 
   it("shows an empty state without treating it as an error", () => {
@@ -176,7 +176,7 @@ describe("BusinessReportView", () => {
       />,
     );
 
-    expect(screen.getByText(/No business observations/)).toBeInTheDocument();
+    expect(screen.getByText(/No hay datos de negocio/)).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -192,7 +192,7 @@ describe("BusinessReportView", () => {
       />,
     );
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Business report is unavailable.");
+    expect(screen.getByRole("alert")).toHaveTextContent("El reporte de negocio no está disponible.");
   });
 
   it("marks stale data as stale while still showing the last known values", () => {
@@ -207,7 +207,7 @@ describe("BusinessReportView", () => {
       />,
     );
 
-    expect(screen.getByText(/Stale — showing last known data/)).toBeInTheDocument();
+    expect(screen.getByText(/Desactualizado — mostrando los últimos datos conocidos/)).toBeInTheDocument();
     expect(screen.getByText("42")).toBeInTheDocument();
   });
 });
@@ -236,6 +236,6 @@ describe("OperationsReportView terminal failure redaction", () => {
       />,
     );
 
-    expect(screen.getByText(/invoice-import — age 300s, attempts 3/)).toBeInTheDocument();
+    expect(screen.getByText(/invoice-import — antigüedad 5 min, intentos 3/)).toBeInTheDocument();
   });
 });

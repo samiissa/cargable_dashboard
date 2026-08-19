@@ -34,25 +34,25 @@ export function BusinessReportView({ data, status, lastUpdatedAt, range, onRange
   return (
     <section aria-labelledby="business-report-heading" className={reportSectionClass}>
       <h1 id="business-report-heading" className={reportHeadingClass}>
-        Business
+        Negocio
       </h1>
       <RangeSelector value={range} onChange={onRangeChange} />
       <FreshnessLabel status={status} lastUpdatedAt={lastUpdatedAt} onRefresh={onRefresh} />
-      {status === "loading" && <p className={stateMutedClass}>Loading business report…</p>}
+      {status === "loading" && <p className={stateMutedClass}>Cargando reporte de negocio…</p>}
       {status === "unavailable" && (
         <p role="alert" className={stateErrorClass}>
-          Business report is unavailable.
+          El reporte de negocio no está disponible.
         </p>
       )}
-      {status === "empty" && <p className={stateMutedClass}>No business observations for this range.</p>}
+      {status === "empty" && <p className={stateMutedClass}>No hay datos de negocio para este rango.</p>}
       {showData && (
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className={cardClass}>
-            <dt className={statLabelClass}>Registered users</dt>
+            <dt className={statLabelClass}>Usuarios registrados</dt>
             <dd className={statValueClass}>{data.registeredUsers}</dd>
           </div>
           <div className={cardClass}>
-            <dt className={statLabelClass}>Active paid subscriptions (entitlement snapshot)</dt>
+            <dt className={statLabelClass}>Suscripciones de pago activas (instantánea de derechos)</dt>
             <dd className={statValueClass}>{data.activePaidSubscriptions.count}</dd>
           </div>
         </dl>

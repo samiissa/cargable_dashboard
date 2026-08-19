@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import "./globals.css";
 
-export const metadata = { title: "Cargable Admin Dashboard" };
+export const metadata = { title: "Panel de Administración Cargable" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

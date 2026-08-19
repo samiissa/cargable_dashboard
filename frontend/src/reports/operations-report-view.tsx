@@ -4,7 +4,7 @@ import type { OperationsReport } from "@cargable/contracts";
 
 import type { SupportedRange } from "../api/dashboard-proxy";
 import { FreshnessLabel } from "./freshness-label";
-import { formatRangeLabel } from "./metadata";
+import { formatAge, formatRangeLabel } from "./metadata";
 import { RangeSelector } from "./range-selector";
 import {
   cardClass,
@@ -40,21 +40,21 @@ export function OperationsReportView({ data, status, lastUpdatedAt, range, onRan
   return (
     <section aria-labelledby="operations-report-heading" className={reportSectionClass}>
       <h1 id="operations-report-heading" className={reportHeadingClass}>
-        Operations
+        Operaciones
       </h1>
       <RangeSelector value={range} onChange={onRangeChange} />
       <FreshnessLabel status={status} lastUpdatedAt={lastUpdatedAt} onRefresh={onRefresh} />
-      {status === "loading" && <p className={stateMutedClass}>Loading operations report…</p>}
+      {status === "loading" && <p className={stateMutedClass}>Cargando reporte de operaciones…</p>}
       {status === "unavailable" && (
         <p role="alert" className={stateErrorClass}>
-          Operations report is unavailable.
+          El reporte de operaciones no está disponible.
         </p>
       )}
-      {status === "empty" && <p className={stateMutedClass}>No operations observations for this range.</p>}
+      {status === "empty" && <p className={stateMutedClass}>No hay datos de operaciones para este rango.</p>}
       {showData && (
         <>
           <div className="flex flex-col gap-2">
-            <h2 className={subHeadingClass}>Queue status</h2>
+            <h2 className={subHeadingClass}>Estado de la cola</h2>
             <ul className={listCardClass}>
               {data.queueStatusCounts.map((entry) => (
                 <li key={entry.status} className={listRowClass}>
@@ -64,7 +64,7 @@ export function OperationsReportView({ data, status, lastUpdatedAt, range, onRan
             </ul>
           </div>
           <div className="flex flex-col gap-2">
-            <h2 className={subHeadingClass}>Monthly report status</h2>
+            <h2 className={subHeadingClass}>Estado del reporte mensual</h2>
             <ul className={listCardClass}>
               {data.monthlyReportStatusCounts.map((entry) => (
                 <li key={entry.status} className={listRowClass}>
@@ -73,15 +73,15 @@ export function OperationsReportView({ data, status, lastUpdatedAt, range, onRan
               ))}
             </ul>
           </div>
-          <p className={cardClass}>Unresolved alerts (snapshot): {data.unresolvedAlerts.count}</p>
+          <p className={cardClass}>Alertas sin resolver (instantánea): {data.unresolvedAlerts.count}</p>
           <details className={listCardClass}>
             <summary className="cursor-pointer px-5 py-3 text-sm font-semibold text-onSurface">
-              Terminal failures ({data.terminalFailures.length})
+              Fallos terminales ({data.terminalFailures.length})
             </summary>
             <ul className="divide-y divide-surfaceBorder">
               {data.terminalFailures.map((failure, index) => (
                 <li key={index} className={listRowClass}>
-                  {failure.jobType} — age {failure.ageSeconds}s, attempts {failure.attempts}
+                  {failure.jobType} — antigüedad {formatAge(failure.ageSeconds)}, intentos {failure.attempts}
                 </li>
               ))}
             </ul>

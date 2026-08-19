@@ -34,21 +34,21 @@ export function InvoicesReportView({ data, status, lastUpdatedAt, range, onRange
   return (
     <section aria-labelledby="invoices-report-heading" className={reportSectionClass}>
       <h1 id="invoices-report-heading" className={reportHeadingClass}>
-        Invoices
+        Facturas
       </h1>
       <RangeSelector value={range} onChange={onRangeChange} />
       <FreshnessLabel status={status} lastUpdatedAt={lastUpdatedAt} onRefresh={onRefresh} />
-      {status === "loading" && <p className={stateMutedClass}>Loading invoices report…</p>}
+      {status === "loading" && <p className={stateMutedClass}>Cargando reporte de facturas…</p>}
       {status === "unavailable" && (
         <p role="alert" className={stateErrorClass}>
-          Invoices report is unavailable.
+          El reporte de facturas no está disponible.
         </p>
       )}
-      {status === "empty" && <p className={stateMutedClass}>No invoice observations for this range.</p>}
+      {status === "empty" && <p className={stateMutedClass}>No hay datos de facturas para este rango.</p>}
       {showData && (
         <>
           <div className="flex flex-col gap-2">
-            <h2 className={subHeadingClass}>Invoice status</h2>
+            <h2 className={subHeadingClass}>Estado de facturas</h2>
             <ul className={listCardClass}>
               {data.invoiceStatusCounts.map((entry) => (
                 <li key={entry.status} className={listRowClass}>
@@ -58,7 +58,7 @@ export function InvoicesReportView({ data, status, lastUpdatedAt, range, onRange
             </ul>
           </div>
           <div className="flex flex-col gap-2">
-            <h2 className={subHeadingClass}>Invoice channels</h2>
+            <h2 className={subHeadingClass}>Canales de facturación</h2>
             <ul className={listCardClass}>
               {data.invoiceChannels.map((entry) => (
                 <li key={entry.channel} className={listRowClass}>
