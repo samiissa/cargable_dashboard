@@ -6,6 +6,16 @@ import type { SupportedRange } from "../api/dashboard-proxy";
 import { FreshnessLabel } from "./freshness-label";
 import { formatRangeLabel } from "./metadata";
 import { RangeSelector } from "./range-selector";
+import {
+  footnoteClass,
+  listCardClass,
+  listRowClass,
+  reportHeadingClass,
+  reportSectionClass,
+  stateErrorClass,
+  stateMutedClass,
+  subHeadingClass,
+} from "./report-styles";
 import type { ReportStatus } from "./use-report";
 
 export interface InvoicesReportViewProps {
@@ -22,32 +32,42 @@ export function InvoicesReportView({ data, status, lastUpdatedAt, range, onRange
   const showData = data && (status === "ready" || status === "stale");
 
   return (
-    <section aria-labelledby="invoices-report-heading">
-      <h1 id="invoices-report-heading">Invoices</h1>
+    <section aria-labelledby="invoices-report-heading" className={reportSectionClass}>
+      <h1 id="invoices-report-heading" className={reportHeadingClass}>
+        Invoices
+      </h1>
       <RangeSelector value={range} onChange={onRangeChange} />
       <FreshnessLabel status={status} lastUpdatedAt={lastUpdatedAt} onRefresh={onRefresh} />
-      {status === "loading" && <p>Loading invoices report…</p>}
-      {status === "unavailable" && <p role="alert">Invoices report is unavailable.</p>}
-      {status === "empty" && <p>No invoice observations for this range.</p>}
+      {status === "loading" && <p className={stateMutedClass}>Loading invoices report…</p>}
+      {status === "unavailable" && (
+        <p role="alert" className={stateErrorClass}>
+          Invoices report is unavailable.
+        </p>
+      )}
+      {status === "empty" && <p className={stateMutedClass}>No invoice observations for this range.</p>}
       {showData && (
         <>
-          <h2>Invoice status</h2>
-          <ul>
-            {data.invoiceStatusCounts.map((entry) => (
-              <li key={entry.status}>
-                {entry.status}: {entry.count}
-              </li>
-            ))}
-          </ul>
-          <h2>Invoice channels</h2>
-          <ul>
-            {data.invoiceChannels.map((entry) => (
-              <li key={entry.channel}>
-                {entry.channel}: {entry.count}
-              </li>
-            ))}
-          </ul>
-          <p>{formatRangeLabel(data.metadata)}</p>
+          <div className="flex flex-col gap-2">
+            <h2 className={subHeadingClass}>Invoice status</h2>
+            <ul className={listCardClass}>
+              {data.invoiceStatusCounts.map((entry) => (
+                <li key={entry.status} className={listRowClass}>
+                  {entry.status}: {entry.count}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex flex-col gap-2">
+            <h2 className={subHeadingClass}>Invoice channels</h2>
+            <ul className={listCardClass}>
+              {data.invoiceChannels.map((entry) => (
+                <li key={entry.channel} className={listRowClass}>
+                  {entry.channel}: {entry.count}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className={footnoteClass}>{formatRangeLabel(data.metadata)}</p>
         </>
       )}
     </section>

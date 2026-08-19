@@ -35,9 +35,11 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
   }
 
   return (
-    <div>
-      <DashboardNav />
-      <main>{children}</main>
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-surfaceBorder bg-background">
+        <DashboardNav />
+      </header>
+      <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
     </div>
   );
 }
